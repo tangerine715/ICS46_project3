@@ -26,7 +26,11 @@ namespace shindler::ics46::project3 {
 template <unsigned int H1, unsigned int H2, unsigned int EvictThreshold>
 class BaseWordSet {
    private:
+   std::string* buf1;
+   std::string* buf2;
+   unsigned int length;
     // You may declare private functions and member variables here.
+
 
    public:
     explicit BaseWordSet(size_t initialCapacity);
@@ -69,48 +73,62 @@ using WordSet =
     BaseWordSet<_impl::BASE_H1, _impl::BASE_H2, _impl::BASE_EVICTION_THRESHOLD>;
 
 template <unsigned int H1, unsigned int H2, unsigned int EvictThreshold>
-BaseWordSet<H1, H2, EvictThreshold>::BaseWordSet(size_t initialCapacity) {
-    // TODO: Implement this
+BaseWordSet<H1, H2, EvictThreshold>::BaseWordSet(size_t initialCapacity)
+: buf1(new std::string[initialCapacity])
+, buf2(new std::string[initialCapacity])
+, length(initialCapacity)
+{
 }
 
 template <unsigned int H1, unsigned int H2, unsigned int EvictThreshold>
 BaseWordSet<H1, H2, EvictThreshold>::~BaseWordSet() {
-    // TODO: Implement this
+    delete[] buf1;
+    delete[] buf2;
 }
 
 template <unsigned int H1, unsigned int H2, unsigned int EvictThreshold>
 void BaseWordSet<H1, H2, EvictThreshold>::insert(const std::string &string) {
     // TODO: Implement this
+    //hahahhahaahah no
 }
 
 template <unsigned int H1, unsigned int H2, unsigned int EvictThreshold>
 bool BaseWordSet<H1, H2, EvictThreshold>::contains(
     const std::string &string) const {
-    // TODO: Implement this. Stub is only to allow code to compile
-    //       (you may remove it)
-    return {};
+    unsigned int val1 = shindler::ics46::project3::polynomialHashFunction(string, H1, length);
+    unsigned int val2 = shindler::ics46::project3::polynomialHashFunction(string, H2, length);
+    //more efficient: check 1st then calculate 2nd
+    //do this on everything
+    return (buf1[val1] == string || buf2[val2] == string);
 }
 
 // return how many distinct strings are in the set
 template <unsigned int H1, unsigned int H2, unsigned int EvictThreshold>
 size_t BaseWordSet<H1, H2, EvictThreshold>::size() const noexcept {
-    // TODO: Implement this. Stub is only to allow code to compile
-    //       (you may remove it)
-    return {};
+    int counter{};
+    for (int i = 0; i < length; ++i) 
+    {
+        if (!buf1[i].empty()) { ++counter; }
+        if (!buf2[i].empty()) { ++counter; }
+    }
+    return counter;
 }
 
 // return how large the underlying array is.
 template <unsigned int H1, unsigned int H2, unsigned int EvictThreshold>
 size_t BaseWordSet<H1, H2, EvictThreshold>::capacity() const noexcept {
-    // TODO: Implement this. Stub is only to allow code to compile
-    //       (you may remove it)
-    return {};
+    return length;
+    //lol im not making this O(n)
+    //check if allowed or if i haaave to loop until '\0'
 }
 
 // removes this word if it is in the wordset.
 template <unsigned int H1, unsigned int H2, unsigned int EvictThreshold>
 void BaseWordSet<H1, H2, EvictThreshold>::erase(const std::string &string) {
-    // TODO: Implement this.
+    unsigned int val1 = shindler::ics46::project3::polynomialHashFunction(string, H1, length);
+    unsigned int val2 = shindler::ics46::project3::polynomialHashFunction(string, H2, length);
+    if (buf1[val1]==string) { buf1[val1] = ""; }
+    else if (buf2[val2]==string) { buf2[val2] = ""; }
 }
 
 }  // namespace shindler::ics46::project3
