@@ -11,26 +11,16 @@ namespace shindler::ics46::project3 {
 // returns s, as a number in the given base, mod the given modulus
 size_t polynomialHashFunction(const std::string &string, unsigned int base,
                               unsigned int mod) {
-    // TODO: Implement this. You may remove the stub (it is only here
-    //       to allow it to compile).
-    std::string alpha = "abcdefghijklmnopqrstuvwxyz"; //check if you need other chars too
-    std::vector<char> chars{alpha.begin(), alpha.end()};
-    std::map<char, unsigned> enumerated{};
-    unsigned counter = 1;
-    for (char chr : chars)
-    {
-        enumerated[chr] = counter;
-        ++counter;
-    }
-
-    counter = 0;
-    unsigned total = 0;
+    unsigned int hash = 0;
+    unsigned int power = 1;
     for (char chr : string)
     {
-        total = (total + static_cast<unsigned int>(enumerated[chr] * pow(base, counter)) % mod) % mod;
-        ++counter;
+        power = (power*base) % mod;
+        hash = (hash + ((static_cast<unsigned int>(chr-'a'+1))%mod) * power) % mod; 
+        //power and total were already modded
+        //although modding the chr-'a'+1 is kinda unnecessary, it's max 26...
     }
-    return total;
+    return hash;
 }
 
 }  // namespace shindler::ics46::project3
