@@ -173,6 +173,8 @@ void BaseWordSet<H1, H2, EvictThreshold>::insert(const std::string &string) {
                     insert(old_buf2[i]);
                 }
             }
+            delete[] old_buf1;
+            delete[] old_buf2;
         }
     }
 }
