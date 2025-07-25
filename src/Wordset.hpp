@@ -3,6 +3,8 @@
 
 #include <cmath>
 #include <cstring>
+#include <iostream>
+#include <ostream>
 #include <string>
 
 namespace shindler::ics46::project3 {
@@ -106,6 +108,7 @@ void BaseWordSet<H1, H2, EvictThreshold>::insert(const std::string &string) {
         std::string string_in_yeet_position = buf2[shindler::ics46::project3::polynomialHashFunction
             (string_to_be_yeeted, H2, length)];
         bool finished = false;
+        // std::cout << "ENTERING WHILE LOOP :: insert" << std::endl;
         while (counter < EvictThreshold && !finished)
         {
             if (string_in_yeet_position.empty())
@@ -146,6 +149,7 @@ void BaseWordSet<H1, H2, EvictThreshold>::insert(const std::string &string) {
 
             ++counter;
         }
+        // std::cout << "LEAVING WHILE LOOP :: insert" << std::endl;
         if (counter >= EvictThreshold) //so we never finished inserting
         {
             unsigned int new_length = 2*length;

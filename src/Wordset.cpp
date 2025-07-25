@@ -13,12 +13,11 @@ size_t polynomialHashFunction(const std::string &string, unsigned int base,
                               unsigned int mod) {
     unsigned int hash = 0;
     unsigned int power = 1;
-    for (char chr : string)
+    for (size_t i = 0; i < string.size(); ++i)
     {
-        power = (power*base) % mod;
+        char chr = string[string.length()-i-1];
         hash = (hash + ((static_cast<unsigned int>(chr-'a'+1))%mod) * power) % mod; 
-        //power and total were already modded
-        //although modding the chr-'a'+1 is kinda unnecessary, it's max 26...
+        power = (power*base) % mod;
     }
     return hash;
 }

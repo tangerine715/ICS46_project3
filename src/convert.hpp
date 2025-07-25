@@ -32,10 +32,12 @@ template <unsigned int H1, unsigned int H2, unsigned int EvictThreshold>
     }
 
     std::unordered_map<std::string, std::string> explored{};
+    explored[start] = ""; 
     frontier.push(start);
     std::string current_vertex{};
     bool found_the_end = false;
 
+    // std::cout << "ENTERING WHILE LOOP :: entering things in frontier" << std::endl;
     while(!frontier.empty() && !found_the_end)
     {
         current_vertex = frontier.front();
@@ -51,10 +53,10 @@ template <unsigned int H1, unsigned int H2, unsigned int EvictThreshold>
             for (char chr = 'a'; chr <= 'z' && !found_the_end; ++chr) 
             {
                 word[i] = chr;
-                if(chr != og_char && words.contains(word))
+                if(chr != og_char && words.contains(word) && explored.find(word) == explored.end())
                 {
                     frontier.push(word);
-                    explored.insert(current_vertex, word);
+                    explored[word] = current_vertex;
                     found_the_end = (word == end);
                 }
             }
@@ -62,15 +64,29 @@ template <unsigned int H1, unsigned int H2, unsigned int EvictThreshold>
             word[i] = og_char;
         }
     }
+    // std::cout << "LEAVING WHILE LOOP :: entering things in frontier" << std::endl;
     if (found_the_end)
     {
-        current_vertex = start;
-        while (!explored.empty())
+        current_vertex = end;
+        // std::cout << "ENTERING WHILE LOOP :: adding to final vector" << std::endl;
+        std::stack<std::string> temp{};
+        while (explored.find(current_vertex) != explored.end())
         {
-            final_vector.push_back(current_vertex);
+            temp.push(current_vertex);
             current_vertex = explored[current_vertex];
-            explored.erase(current_vertex);
         }
+        while (!temp.empty()) 
+        {
+            final_vector.push_back(temp.top());
+            temp.pop();
+        }
+        // while (!explored.empty())
+        // {
+        //     final_vector.push_back(current_vertex);
+        //     current_vertex = explored[current_vertex];
+        //     explored.erase(current_vertex);
+        // }
+        // std::cout << "LEAVING WHILE LOOP :: adding to final vector" << std::endl;
     }
     return final_vector;
 }
