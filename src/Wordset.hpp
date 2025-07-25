@@ -202,7 +202,7 @@ bool BaseWordSet<H1, H2, EvictThreshold>::contains(
 template <unsigned int H1, unsigned int H2, unsigned int EvictThreshold>
 size_t BaseWordSet<H1, H2, EvictThreshold>::size() const noexcept {
     int counter{};
-    for (int i = 0; i < length; ++i) 
+    for (unsigned int i = 0; i < length; ++i) 
     {
         if (!buf1[i].empty()) { ++counter; }
         if (!buf2[i].empty()) { ++counter; }
