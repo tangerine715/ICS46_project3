@@ -51,11 +51,17 @@ class BaseWordSet {
     // adds the given string to the WordSet, so that any
     // future calls to contains(s) will return true, unless that is later
     // removed.
-    std::pair<std::string, unsigned int> insert_until_evict(const std::string &string);
+    std::pair<std::string, unsigned int> insert_until_evict(const std::string &string,
+    std::string* given1, std::string* given2, unsigned int &given_length);
+
+    void insert_or_resize(const std::string &string, std::string* given1, std::string* given2, unsigned int &given_length);
 
     void insert(const std::string &string);
 
-    void resize_and_rehash();
+    void fully_insert_or_resize(const std::string &string,
+std::string* given1, std::string* given2, unsigned int &given_length);
+
+    void resize_and_rehash(std::string* given1, std::string* given2, unsigned int &given_length);
 
     [[nodiscard]] bool isPrime(int cur_length) const;
 
@@ -97,13 +103,14 @@ BaseWordSet<H1, H2, EvictThreshold>::~BaseWordSet() {
 }
 
 template <unsigned int H1, unsigned int H2, unsigned int EvictThreshold>
-std::pair<std::string, unsigned int> BaseWordSet<H1, H2, EvictThreshold>::insert_until_evict(const std::string &string) {
+std::pair<std::string, unsigned int> BaseWordSet<H1, H2, EvictThreshold>::insert_until_evict(const std::string &string,
+std::string* given1, std::string* given2, unsigned int &given_length) {
     unsigned int counter = 0;
     std::string string_to_be_inserted = string;
-    std::string string_to_be_yeeted = buf1[shindler::ics46::project3::polynomialHashFunction
-        (string_to_be_inserted, H1, length)];
-    std::string string_in_yeet_position = buf2[shindler::ics46::project3::polynomialHashFunction
-        (string_to_be_yeeted, H2, length)];
+    std::string string_to_be_yeeted = given1[shindler::ics46::project3::polynomialHashFunction
+        (string_to_be_inserted, H1, given_length)];
+    std::string string_in_yeet_position = given2[shindler::ics46::project3::polynomialHashFunction
+        (string_to_be_yeeted, H2, given_length)];
     bool finished = false;
     // std::cout << "ENTERING WHILE LOOP :: insert" << std::endl;
     while (counter < EvictThreshold && !finished)
@@ -114,34 +121,34 @@ std::pair<std::string, unsigned int> BaseWordSet<H1, H2, EvictThreshold>::insert
         }
         //string to be inserted enters buf1 / buf2 of that value (depending on counter)
         if (counter % 2 == 0) {
-            buf1[shindler::ics46::project3::polynomialHashFunction
-        (string_to_be_inserted, H1, length)] = string_to_be_inserted;
+            given1[shindler::ics46::project3::polynomialHashFunction
+        (string_to_be_inserted, H1, given_length)] = string_to_be_inserted;
         }
         else {
-            buf2[shindler::ics46::project3::polynomialHashFunction
-        (string_to_be_inserted, H2, length)] = string_to_be_inserted;
+            given2[shindler::ics46::project3::polynomialHashFunction
+        (string_to_be_inserted, H2, given_length)] = string_to_be_inserted;
         }
         //string to be inserted = string to be yeeted
         string_to_be_inserted = string_to_be_yeeted;
         //string to be yeeted enters string in yeet position
         if (counter % 2 == 0) {
-            buf2[shindler::ics46::project3::polynomialHashFunction
-        (string_to_be_yeeted, H2, length)] = string_to_be_yeeted;
+            given2[shindler::ics46::project3::polynomialHashFunction
+        (string_to_be_yeeted, H2, given_length)] = string_to_be_yeeted;
         }
         else {
-            buf1[shindler::ics46::project3::polynomialHashFunction
-        (string_to_be_yeeted, H1, length)] = string_to_be_yeeted;
+            given1[shindler::ics46::project3::polynomialHashFunction
+        (string_to_be_yeeted, H1, given_length)] = string_to_be_yeeted;
         }
         //string to be yeeted = string in yeet position
         string_to_be_yeeted = string_in_yeet_position;
         //string in yeet position = buf1 / buf2 (depending on counter) of same thing
         if (counter % 2 == 0) {
-            string_in_yeet_position = buf1[shindler::ics46::project3::polynomialHashFunction
-        (string_to_be_yeeted, H1, length)];
+            string_in_yeet_position = given1[shindler::ics46::project3::polynomialHashFunction
+        (string_to_be_yeeted, H1, given_length)];
         }
         else {
-            string_in_yeet_position = buf2[shindler::ics46::project3::polynomialHashFunction
-        (string_to_be_yeeted, H2, length)];
+            string_in_yeet_position = given2[shindler::ics46::project3::polynomialHashFunction
+        (string_to_be_yeeted, H2, given_length)];
         }
 
         ++counter;
@@ -151,37 +158,49 @@ std::pair<std::string, unsigned int> BaseWordSet<H1, H2, EvictThreshold>::insert
 }
 
 template <unsigned int H1, unsigned int H2, unsigned int EvictThreshold>
-void BaseWordSet<H1, H2, EvictThreshold>::insert(const std::string &string) {
-    unsigned int val = shindler::ics46::project3::polynomialHashFunction(string, H1, length);
-    if (buf1[val].empty())
+void BaseWordSet<H1, H2, EvictThreshold>::insert_or_resize(const std::string &string,
+std::string* given1, std::string* given2, unsigned int &given_length) {
+    std::string entry;
+    unsigned int counter = 0;
+    auto thing = insert_until_evict(string, given1, given2, given_length);
+    entry = thing.first;
+    counter = thing.second;
+    if (counter >= EvictThreshold) //so we never finished inserting
     {
-        buf1[val] = string;
-    }
-    else
-    {
-        std::string entry;
-        unsigned int counter = 0;
-        auto thing = insert_until_evict(string);
-        entry = thing.first;
-        counter = thing.second;
-        if (counter >= EvictThreshold) //so we never finished inserting
-        {
-            resize_and_rehash();
-            insert(entry);
-        }
+        resize_and_rehash(given1, given2, given_length);
+        insert(entry);
     }
 }
 
 template <unsigned int H1, unsigned int H2, unsigned int EvictThreshold>
-void BaseWordSet<H1, H2, EvictThreshold>::resize_and_rehash() {
-    unsigned int new_length = 2*length;
+void BaseWordSet<H1, H2, EvictThreshold>::fully_insert_or_resize(const std::string &string,
+std::string* given1, std::string* given2, unsigned int &given_length) {
+    unsigned int val = shindler::ics46::project3::polynomialHashFunction(string, H1, given_length);
+    if (given1[val].empty())
+    {
+        given1[val] = string;
+    }
+    else
+    {
+        insert_or_resize(string, given1, given2, given_length);
+    }
+}
+
+template <unsigned int H1, unsigned int H2, unsigned int EvictThreshold>
+void BaseWordSet<H1, H2, EvictThreshold>::insert(const std::string &string) {
+    fully_insert_or_resize(string, buf1, buf2, length);
+}
+
+template <unsigned int H1, unsigned int H2, unsigned int EvictThreshold>
+void BaseWordSet<H1, H2, EvictThreshold>::resize_and_rehash(std::string* given1, std::string* given2, unsigned int &given_length) {
+    unsigned int new_length = 2*given_length;
     for (; !isPrime(new_length); ++new_length) { }
-    std::string* old_buf1 = buf1;
-    std::string* old_buf2 = buf2;
-    unsigned int old_length = length;
+    std::string* old_buf1 = given1;
+    std::string* old_buf2 = given2;
+    unsigned int old_length = given_length;
     buf1 = new std::string[new_length];
     buf2 = new std::string[new_length];
-    length = new_length;
+    given_length = new_length;
 
     for (unsigned int i = 0; i < old_length && length == new_length; ++i)
     {
