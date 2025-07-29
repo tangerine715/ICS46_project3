@@ -18,6 +18,8 @@ template <unsigned int H1, unsigned int H2, unsigned int EvictThreshold>
                                                const std::string& end,
                                                const BaseWordSet<H1, H2, EvictThreshold>& words) {
     std::cout << start << end << words.capacity() << std::endl;
+    std::vector<std::string> final_vector{};
+    return final_vector;
     // std::queue<std::string> frontier{};
     // std::vector<std::string> final_vector{};
     // //return empty vector if string lengths are different
