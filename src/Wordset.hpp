@@ -218,13 +218,27 @@ void BaseWordSet<H1, H2, EvictThreshold>::resize_and_rehash(std::string entry, c
         {
             if(!old1[index].empty())
             {
-                counter = insert_until_evict(old1[index]).second;
-                if (counter >= EvictThreshold) { break; }
+                if (buf1[index].empty())
+                {
+                    buf1[index] = old1[index];
+                }
+                else 
+                {
+                    counter = insert_until_evict(old1[index]).second;
+                    if (counter >= EvictThreshold) { break; }
+                }
             }
             if(!old2[index].empty())
             {
-                counter = insert_until_evict(old2[index]).second;
-                if (counter >= EvictThreshold) { break; }
+                if (buf1[index].empty())
+                {
+                    buf1[index] = old2[index];
+                }
+                else 
+                {
+                    counter = insert_until_evict(old2[index]).second;
+                    if (counter >= EvictThreshold) { break; }
+                }
             }
         }
         counter = insert_until_evict(entry).second;
