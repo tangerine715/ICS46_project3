@@ -53,14 +53,14 @@ class BaseWordSet {
     // removed.
     std::pair<std::string, unsigned int> insert_until_evict(const std::string &string);
 
-    void insert_or_resize(const std::string &string, std::string* old1, std::string* old2, unsigned int &old_length);
+    void insert_or_resize(const std::string &string, const std::string* old1, const std::string* old2, unsigned int &old_length);
 
     void insert(const std::string &string);
 
     void fully_insert_or_resize(const std::string &string,
-std::string* old1, std::string* old2, unsigned int &old_length);
+const std::string* old1, const std::string* old2, unsigned int &old_length);
 
-    void resize_and_rehash(std::string entry, std::string* old1, std::string* old2, unsigned int &old_length);
+    void resize_and_rehash(std::string entry, const std::string* old1, const std::string* old2, unsigned int &old_length);
 
     [[nodiscard]] bool isPrime(int cur_length) const;
 
@@ -157,26 +157,13 @@ std::pair<std::string, unsigned int> BaseWordSet<H1, H2, EvictThreshold>::insert
 
 template <unsigned int H1, unsigned int H2, unsigned int EvictThreshold>
 void BaseWordSet<H1, H2, EvictThreshold>::insert_or_resize(const std::string &string,
-std::string* old1, std::string* old2, unsigned int &old_length) {
-    std::string entry;
-    unsigned int counter = 0;
-    // std::cout << "ABOUT TO INSERT UNTIL EVICT " << string << std::endl;
-    auto thing = insert_until_evict(string);
-    entry = thing.first;
-    counter = thing.second;
+const std::string* old1, const std::string* old2, unsigned int &old_length) {
+    auto [entry, counter] = insert_until_evict(string);
     if (counter >= EvictThreshold) //so we never finished inserting
     {
-        // auto *new_old1 = new std::string[length];
-        // auto *new_old2 = new std::string[length];
-        // for (unsigned int i = 0; i < length; ++i)
-        // {
-        //     new_old1[i] = old1[i];
-        //     new_old2[i] = old2[i];
-        // }
-        // unsigned int new_old_length = old_length;
-        auto oldold1 = new std::string[length];
-        auto oldold2 = new std::string[length];
-        for (unsigned int i = 0; i < length; ++i)
+        auto oldold1 = new std::string[old_length];
+        auto oldold2 = new std::string[old_length];
+        for (unsigned int i = 0; i < old_length; ++i)
         {
             oldold1[i] = old1[i];
             oldold2[i] = old2[i];
@@ -192,9 +179,9 @@ std::string* old1, std::string* old2, unsigned int &old_length) {
 
 template <unsigned int H1, unsigned int H2, unsigned int EvictThreshold>
 void BaseWordSet<H1, H2, EvictThreshold>::fully_insert_or_resize(const std::string &string,
-std::string* old1, std::string* old2, unsigned int &old_length) {
-    unsigned int val = shindler::ics46::project3::polynomialHashFunction(string, H1, old_length);
-    // unsigned int val2 = shindler::ics46::project3::polynomialHashFunction(string, H2, old_length);
+const std::string* old1, const std::string* old2, unsigned int &old_length) {
+    unsigned int val = shindler::ics46::project3::polynomialHashFunction(string, H1, length);
+    // unsigned int val2 = shindler::ics46::project3::polynomialHashFunction(string, H2, length);
     // std::cout << "the H1 hash of " << string << " is " << val << std::endl;
     // std::cout << "the H2 hash of " << string << " is " << val2 << std::endl;
     // std::cout << "the current capacity is " << length << std::endl;
@@ -210,23 +197,11 @@ std::string* old1, std::string* old2, unsigned int &old_length) {
 
 template <unsigned int H1, unsigned int H2, unsigned int EvictThreshold>
 void BaseWordSet<H1, H2, EvictThreshold>::insert(const std::string &string) {
-    // auto *old1 = new std::string[length];
-    // auto *old2 = new std::string[length];
-    // for (unsigned int i = 0; i < length; ++i)
-    // {
-    //     old1[i] = buf1[i];
-    //     old2[i] = buf2[i];
-    // }
-    // unsigned int old_length = length;
     fully_insert_or_resize(string, buf1, buf2, length);
-    // delete[] buf1;
-    // delete[] buf2;
-    // buf1 = old1;
-    // buf2 = old2;
 }
 
 template <unsigned int H1, unsigned int H2, unsigned int EvictThreshold>
-void BaseWordSet<H1, H2, EvictThreshold>::resize_and_rehash(std::string entry, std::string* old1, std::string* old2, unsigned int &old_length) {
+void BaseWordSet<H1, H2, EvictThreshold>::resize_and_rehash(std::string entry, const std::string* old1, const std::string* old2, unsigned int &old_length) {
     //old1, old2, and old_length ARE the copies, treat them as such
     //keep editing buf while preserving old1 and old2
     unsigned int new_length = 2*length;
