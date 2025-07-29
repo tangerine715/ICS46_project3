@@ -60,7 +60,7 @@ class BaseWordSet {
     void fully_insert_or_resize(const std::string &string,
 const std::string* old1, const std::string* old2, unsigned int &old_length);
 
-    void resize_and_rehash(std::string entry, const std::string* old1, const std::string* old2, unsigned int &old_length);
+    void resize_and_rehash(std::string whee, const std::string* old1, const std::string* old2, unsigned int &old_length);
 
     [[nodiscard]] bool isPrime(int cur_length) const;
 
@@ -201,32 +201,49 @@ void BaseWordSet<H1, H2, EvictThreshold>::insert(const std::string &string) {
 }
 
 template <unsigned int H1, unsigned int H2, unsigned int EvictThreshold>
-void BaseWordSet<H1, H2, EvictThreshold>::resize_and_rehash(std::string entry, const std::string* old1, const std::string* old2, unsigned int &old_length) {
+void BaseWordSet<H1, H2, EvictThreshold>::resize_and_rehash(std::string whee, const std::string* old1, const std::string* old2, unsigned int &old_length) {
     //old1, old2, and old_length ARE the copies, treat them as such
     //keep editing buf while preserving old1 and old2
-    unsigned int new_length = 2*length;
-    for (; !isPrime(new_length); ++new_length) { }
+    bool success = false;
+    // unsigned int counter = 0;
+    // unsigned int index = 0;
 
-    buf1 = new std::string[new_length];
-    buf2 = new std::string[new_length];
-    length = new_length;
-
-    for (unsigned int i = 0; i < old_length && length == new_length; ++i)
+    while(!success)
     {
-        if(!old1[i].empty())
+        unsigned int new_length = 2*length;
+        for (; !isPrime(new_length); ++new_length) { }
+
+        buf1 = new std::string[new_length];
+        buf2 = new std::string[new_length];
+        length = new_length;
+
+        unsigned int index = 0;
+        for (; index < old_length && length == new_length; ++index)
         {
-            fully_insert_or_resize(old1[i], old1, old2, old_length);
-            // insert(old_buf1[i]);
+            if(!old1[index].empty())
+            {
+                auto counter = insert_until_evict(old1[index]).second;
+                if (counter >= EvictThreshold) { break; }
+                // fully_insert_or_resize(old1[i], old1, old2, old_length);
+                // insert(old_buf1[i]);
+            }
+            if (length != new_length) { break; }
+            if(!old2[index].empty())
+            {
+                auto counter = insert_until_evict(old2[index]).second;
+                if (counter >= EvictThreshold) { break; }
+                // fully_insert_or_resize(old2[i], old1, old2, old_length);
+                // insert(old_buf2[i]);
+            }
         }
-        if (length != new_length) { break; }
-        if(!old2[i].empty())
+        auto counter = insert_until_evict(whee).second;
+        if (counter < EvictThreshold && index == old_length)
         {
-            fully_insert_or_resize(old2[i], old1, old2, old_length);
-            // insert(old_buf2[i]);
+            success = true;
         }
+        // fully_insert_or_resize(entry, old1, old2, old_length);
+        // insert(entry)
     }
-    fully_insert_or_resize(entry, old1, old2, old_length);
-    // insert(entry);
 }
 
 
