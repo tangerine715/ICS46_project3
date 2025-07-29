@@ -17,7 +17,7 @@ template <unsigned int H1, unsigned int H2, unsigned int EvictThreshold>
 [[nodiscard]] std::vector<std::string> convert(const std::string& start,
                                                const std::string& end,
                                                const BaseWordSet<H1, H2, EvictThreshold>& words) {
-    std::cout << start << end << words[0] << std::endl;
+    std::cout << start << end << words.capacity() << std::endl;
     // std::queue<std::string> frontier{};
     // std::vector<std::string> final_vector{};
     // //return empty vector if string lengths are different
