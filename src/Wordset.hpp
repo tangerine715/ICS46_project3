@@ -51,16 +51,13 @@ class BaseWordSet {
     // adds the given string to the WordSet, so that any
     // future calls to contains(s) will return true, unless that is later
     // removed.
-    std::pair<std::string, unsigned int> insert_until_evict(const std::string &string);
-
-    void insert_or_resize(const std::string &string, const std::string* old1, const std::string* old2, unsigned int &old_length);
-
     void insert(const std::string &string);
 
-    void fully_insert_or_resize(const std::string &string,
-const std::string* old1, const std::string* old2, unsigned int &old_length);
+    void insert_or_resize(const std::string &string);
 
-    void resize_and_rehash(std::string whee, const std::string* old1, const std::string* old2, unsigned int &old_length);
+    std::pair<std::string, unsigned int> insert_until_evict(const std::string &string);
+
+    void resize_and_rehash(std::string entry, const std::string* old1, const std::string* old2, unsigned int &old_length);
 
     [[nodiscard]] bool isPrime(int cur_length) const;
 
@@ -99,6 +96,48 @@ template <unsigned int H1, unsigned int H2, unsigned int EvictThreshold>
 BaseWordSet<H1, H2, EvictThreshold>::~BaseWordSet() {
     delete[] buf1;
     delete[] buf2;
+}
+
+template <unsigned int H1, unsigned int H2, unsigned int EvictThreshold>
+void BaseWordSet<H1, H2, EvictThreshold>::insert(const std::string &string) {
+    if (contains(string))
+    {
+        return;
+    }
+    unsigned int val = shindler::ics46::project3::polynomialHashFunction(string, H1, length);
+    // unsigned int val2 = shindler::ics46::project3::polynomialHashFunction(string, H2, length);
+    // std::cout << "the H1 hash of " << string << " is " << val << std::endl;
+    // std::cout << "the H2 hash of " << string << " is " << val2 << std::endl;
+    // std::cout << "the current capacity is " << length << std::endl;
+    if (buf1[val].empty())
+    {
+        buf1[val] = string;
+    }
+    else
+    {
+        insert_or_resize(string);
+    }
+}
+
+template <unsigned int H1, unsigned int H2, unsigned int EvictThreshold>
+void BaseWordSet<H1, H2, EvictThreshold>::insert_or_resize(const std::string &string) {
+    auto [entry, counter] = insert_until_evict(string);
+    if (counter >= EvictThreshold) //so we never finished inserting
+    {
+        auto old1 = new std::string[length];
+        auto old2 = new std::string[length];
+        for (unsigned int i = 0; i < length; ++i)
+        {
+            old1[i] = buf1[i];
+            old2[i] = buf2[i];
+        }
+        unsigned int old_length = length;
+        // std::cout << "ABOUT TO RESIZE AND REHASH BC OF " << string << " WITH CUR CAP " << length << std::endl;
+        resize_and_rehash(entry, old1, old2, old_length); //this also inserts
+        // std::cout << "SUCCESS OF " << string << " WITH CUR CAP " << length << std::endl;
+        delete[] old1;
+        delete[] old2;
+    }
 }
 
 template <unsigned int H1, unsigned int H2, unsigned int EvictThreshold>
@@ -156,63 +195,14 @@ std::pair<std::string, unsigned int> BaseWordSet<H1, H2, EvictThreshold>::insert
 }
 
 template <unsigned int H1, unsigned int H2, unsigned int EvictThreshold>
-void BaseWordSet<H1, H2, EvictThreshold>::insert_or_resize(const std::string &string,
-const std::string* old1, const std::string* old2, unsigned int &old_length) {
-    auto [entry, counter] = insert_until_evict(string);
-    if (counter >= EvictThreshold) //so we never finished inserting
-    {
-        auto oldold1 = new std::string[old_length];
-        auto oldold2 = new std::string[old_length];
-        for (unsigned int i = 0; i < old_length; ++i)
-        {
-            oldold1[i] = old1[i];
-            oldold2[i] = old2[i];
-        }
-        unsigned int oldold_length = old_length;
-        // std::cout << "ABOUT TO RESIZE AND REHASH BC OF " << string << " WITH CUR CAP " << length << std::endl;
-        resize_and_rehash(entry, oldold1, oldold2, oldold_length); //this also inserts
-        // std::cout << "SUCCESS OF " << string << " WITH CUR CAP " << length << std::endl;
-        delete[] oldold1;
-        delete[] oldold2;
-    }
-}
-
-template <unsigned int H1, unsigned int H2, unsigned int EvictThreshold>
-void BaseWordSet<H1, H2, EvictThreshold>::fully_insert_or_resize(const std::string &string,
-const std::string* old1, const std::string* old2, unsigned int &old_length) {
-    if (contains(string))
-    {
-        return;
-    }
-    unsigned int val = shindler::ics46::project3::polynomialHashFunction(string, H1, length);
-    // unsigned int val2 = shindler::ics46::project3::polynomialHashFunction(string, H2, length);
-    // std::cout << "the H1 hash of " << string << " is " << val << std::endl;
-    // std::cout << "the H2 hash of " << string << " is " << val2 << std::endl;
-    // std::cout << "the current capacity is " << length << std::endl;
-    if (buf1[val].empty())
-    {
-        buf1[val] = string;
-    }
-    else
-    {
-        insert_or_resize(string, old1, old2, old_length);
-    }
-}
-
-template <unsigned int H1, unsigned int H2, unsigned int EvictThreshold>
-void BaseWordSet<H1, H2, EvictThreshold>::insert(const std::string &string) {
-    fully_insert_or_resize(string, buf1, buf2, length);
-}
-
-template <unsigned int H1, unsigned int H2, unsigned int EvictThreshold>
-void BaseWordSet<H1, H2, EvictThreshold>::resize_and_rehash(std::string whee, const std::string* old1, const std::string* old2, unsigned int &old_length) {
+void BaseWordSet<H1, H2, EvictThreshold>::resize_and_rehash(std::string entry, const std::string* old1, const std::string* old2, unsigned int &old_length) {
     //old1, old2, and old_length ARE the copies, treat them as such
     //keep editing buf while preserving old1 and old2
-    bool success = false;
-    // unsigned int counter = 0;
-    // unsigned int index = 0;
 
-    while(!success)
+    unsigned int counter = 0;
+    unsigned int index = 0;
+
+    while(!(counter < EvictThreshold && index == old_length))
     {
         unsigned int new_length = 2*length;
         for (; !isPrime(new_length); ++new_length) { }
@@ -223,32 +213,21 @@ void BaseWordSet<H1, H2, EvictThreshold>::resize_and_rehash(std::string whee, co
         buf2 = new std::string[new_length];
         length = new_length;
 
-        unsigned int index = 0;
-        for (; index < old_length && length == new_length; ++index)
+        index = 0;
+        for (; index < old_length; ++index)
         {
             if(!old1[index].empty())
             {
-                auto counter = insert_until_evict(old1[index]).second;
+                counter = insert_until_evict(old1[index]).second;
                 if (counter >= EvictThreshold) { break; }
-                // fully_insert_or_resize(old1[i], old1, old2, old_length);
-                // insert(old_buf1[i]);
             }
-            if (length != new_length) { break; }
             if(!old2[index].empty())
             {
-                auto counter = insert_until_evict(old2[index]).second;
+                counter = insert_until_evict(old2[index]).second;
                 if (counter >= EvictThreshold) { break; }
-                // fully_insert_or_resize(old2[i], old1, old2, old_length);
-                // insert(old_buf2[i]);
             }
         }
-        auto counter = insert_until_evict(whee).second;
-        if (counter < EvictThreshold && index == old_length)
-        {
-            success = true;
-        }
-        // fully_insert_or_resize(entry, old1, old2, old_length);
-        // insert(entry)
+        counter = insert_until_evict(entry).second;
     }
 }
 
