@@ -218,9 +218,10 @@ void BaseWordSet<H1, H2, EvictThreshold>::resize_and_rehash(std::string entry, c
         {
             if(!old1[index].empty())
             {
-                if (buf1[index].empty())
+                auto val1 = shindler::ics46::project3::polynomialHashFunction(old1[index], H1, length);
+                if (buf1[val1].empty())
                 {
-                    buf1[index] = old1[index];
+                    buf1[val1] = old1[index];
                 }
                 else 
                 {
@@ -230,9 +231,10 @@ void BaseWordSet<H1, H2, EvictThreshold>::resize_and_rehash(std::string entry, c
             }
             if(!old2[index].empty())
             {
-                if (buf1[index].empty())
+                auto val1 = shindler::ics46::project3::polynomialHashFunction(old2[index], H1, length);
+                if (buf1[val1].empty())
                 {
-                    buf1[index] = old2[index];
+                    buf1[val1] = old2[index];
                 }
                 else 
                 {
