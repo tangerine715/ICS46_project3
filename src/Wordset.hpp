@@ -169,9 +169,9 @@ const std::string* old1, const std::string* old2, unsigned int &old_length) {
             oldold2[i] = old2[i];
         }
         unsigned int oldold_length = old_length;
-        std::cout << "ABOUT TO RESIZE AND REHASH BC OF " << string << " WITH CUR CAP " << length << std::endl;
+        // std::cout << "ABOUT TO RESIZE AND REHASH BC OF " << string << " WITH CUR CAP " << length << std::endl;
         resize_and_rehash(entry, oldold1, oldold2, oldold_length); //this also inserts
-        std::cout << "SUCCESS OF " << string << " WITH CUR CAP " << length << std::endl;
+        // std::cout << "SUCCESS OF " << string << " WITH CUR CAP " << length << std::endl;
         delete[] oldold1;
         delete[] oldold2;
     }
@@ -213,6 +213,8 @@ void BaseWordSet<H1, H2, EvictThreshold>::resize_and_rehash(std::string whee, co
         unsigned int new_length = 2*length;
         for (; !isPrime(new_length); ++new_length) { }
 
+        delete[] buf1;
+        delete[] buf2;
         buf1 = new std::string[new_length];
         buf2 = new std::string[new_length];
         length = new_length;
