@@ -180,6 +180,10 @@ const std::string* old1, const std::string* old2, unsigned int &old_length) {
 template <unsigned int H1, unsigned int H2, unsigned int EvictThreshold>
 void BaseWordSet<H1, H2, EvictThreshold>::fully_insert_or_resize(const std::string &string,
 const std::string* old1, const std::string* old2, unsigned int &old_length) {
+    if (contains(string))
+    {
+        return;
+    }
     unsigned int val = shindler::ics46::project3::polynomialHashFunction(string, H1, length);
     // unsigned int val2 = shindler::ics46::project3::polynomialHashFunction(string, H2, length);
     // std::cout << "the H1 hash of " << string << " is " << val << std::endl;
