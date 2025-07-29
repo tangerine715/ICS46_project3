@@ -78,4 +78,41 @@ TEST_CASE("Table:MultiInsertWithResize:ExpectInTableAndResizedTable",
     REQUIRE(wordSet.capacity() == 23);
 }
 
+TEST_CASE("Table:MultiInsertWithResizeandErase:ExpectInTableAndResizedTable",
+          "[Sample][Table][Insert]") {
+    const static size_t INITIAL_CAPACITY = 11;
+    proj3::WordSet wordSet(INITIAL_CAPACITY);
+    wordSet.insert("sleepy");
+    wordSet.insert("happy");
+    wordSet.insert("dopey");
+    wordSet.insert("sneezy");
+    REQUIRE(wordSet.contains("sneezy"));
+    wordSet.insert("sneezy");
+    wordSet.erase("sneezy");
+    REQUIRE(!wordSet.contains("sneezy"));
+    wordSet.erase("sneezy");
+    REQUIRE(!wordSet.contains("sneezy"));
+    wordSet.insert("sneezy");
+    wordSet.insert("datalink");
+    wordSet.insert("australia");
+    wordSet.insert("guacamole");
+    wordSet.insert("phylum");
+    REQUIRE(wordSet.contains("happy"));
+    REQUIRE(wordSet.contains("dopey"));
+    wordSet.insert("salsa");
+    wordSet.insert("sloth");
+    wordSet.insert("colossus");
+    wordSet.insert("synergize");
+    wordSet.insert("monday");
+    wordSet.insert("tuesday");
+    wordSet.insert("wednesday");
+    wordSet.insert("thursday");
+    wordSet.insert("friday");
+    wordSet.insert("saturday");
+    wordSet.insert("sunday");
+    REQUIRE(wordSet.contains("monday"));
+    REQUIRE(wordSet.contains("sunday"));
+    REQUIRE(wordSet.capacity() == 23);
+}
+
 }  // namespace

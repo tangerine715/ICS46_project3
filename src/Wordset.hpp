@@ -132,9 +132,9 @@ void BaseWordSet<H1, H2, EvictThreshold>::insert_or_resize(const std::string &st
             old2[i] = buf2[i];
         }
         unsigned int old_length = length;
-        // std::cout << "ABOUT TO RESIZE AND REHASH BC OF " << string << " WITH CUR CAP " << length << std::endl;
-        resize_and_rehash(entry, old1, old2, old_length); //this also inserts
-        // std::cout << "SUCCESS OF " << string << " WITH CUR CAP " << length << std::endl;
+        std::cout << "ABOUT TO RESIZE AND REHASH BC OF " << string << " WITH CUR CAP " << length << std::endl;
+        resize_and_rehash(entry, old1, old2, old_length);
+        std::cout << "SUCCESS OF " << string << " WITH CUR CAP " << length << std::endl;
         delete[] old1;
         delete[] old2;
     }
