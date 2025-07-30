@@ -118,17 +118,17 @@ void BaseWordSet<H1, H2, EvictThreshold>::insert(const std::string &string) {
     {
         insert_or_resize(string);
     }
-    std::cout << "just inserted " << string << std::endl;
-    std::cout << "Now buf is: " << std::endl;
-    for (unsigned int i = 0; i < length; ++i)
-    {
-        std::cout << " " << buf1[i];
-    }
-    for (unsigned int i = 0; i < length; ++i)
-    {
-        std::cout << " " << buf2[i];
-    }
-    std::cout << std::endl;
+    // std::cout << "just inserted " << string << std::endl;
+    // std::cout << "Now buf is: " << std::endl;
+    // for (unsigned int i = 0; i < length; ++i)
+    // {
+    //     std::cout << " " << buf1[i];
+    // }
+    // for (unsigned int i = 0; i < length; ++i)
+    // {
+    //     std::cout << " " << buf2[i];
+    // }
+    // std::cout << std::endl;
 }
 
 template <unsigned int H1, unsigned int H2, unsigned int EvictThreshold>
