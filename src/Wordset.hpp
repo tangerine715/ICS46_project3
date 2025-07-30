@@ -6,6 +6,7 @@
 #include <iostream>
 #include <ostream>
 #include <string>
+#include <tuple>
 
 namespace shindler::ics46::project3 {
 
@@ -117,6 +118,17 @@ void BaseWordSet<H1, H2, EvictThreshold>::insert(const std::string &string) {
     {
         insert_or_resize(string);
     }
+    std::cout << "just inserted " << string << std::endl;
+    std::cout << "Now buf is: " << std::endl;
+    for (unsigned int i = 0; i < length; ++i)
+    {
+        std::cout << " " << buf1[i];
+    }
+    for (unsigned int i = 0; i < length; ++i)
+    {
+        std::cout << " " << buf2[i];
+    }
+    std::cout << std::endl;
 }
 
 template <unsigned int H1, unsigned int H2, unsigned int EvictThreshold>
@@ -133,7 +145,7 @@ void BaseWordSet<H1, H2, EvictThreshold>::insert_or_resize(const std::string &st
         }
         unsigned int old_length = length;
         std::cout << "ABOUT TO RESIZE AND REHASH BC OF " << string << " WITH CUR CAP " << length << std::endl;
-        resize_and_rehash(entry, old1, old2, old_length);
+        resize_and_rehash(string, old1, old2, old_length);
         std::cout << "SUCCESS OF " << string << " WITH CUR CAP " << length << std::endl;
         delete[] old1;
         delete[] old2;
