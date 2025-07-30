@@ -145,7 +145,9 @@ void BaseWordSet<H1, H2, EvictThreshold>::insert_or_resize(const std::string &st
         }
         unsigned int old_length = length;
         std::cout << "ABOUT TO RESIZE AND REHASH BC OF " << string << " WITH CUR CAP " << length << std::endl;
-        resize_and_rehash(string, old1, old2, old_length);
+        std::cout << "Is " << string << " contained? Well " << contains(string) << std::endl;
+        std::cout << "Entry is " << entry << ". Is it contained? Well " << contains(entry) << std::endl;
+        resize_and_rehash(entry, old1, old2, old_length);
         std::cout << "SUCCESS OF " << string << " WITH CUR CAP " << length << std::endl;
         delete[] old1;
         delete[] old2;
@@ -203,7 +205,7 @@ std::pair<std::string, unsigned int> BaseWordSet<H1, H2, EvictThreshold>::insert
         ++counter;
     }
     
-    return {string_to_be_inserted, counter};
+    return {string_to_be_yeeted, counter};
 }
 
 template <unsigned int H1, unsigned int H2, unsigned int EvictThreshold>
@@ -214,7 +216,7 @@ void BaseWordSet<H1, H2, EvictThreshold>::resize_and_rehash(std::string entry, c
     unsigned int counter = 0;
     unsigned int index = 0;
 
-    while(!(counter < EvictThreshold && index == old_length))
+    while(!(index == old_length))
     {
         unsigned int new_length = 2*length;
         for (; !isPrime(new_length); ++new_length) { }
@@ -226,6 +228,10 @@ void BaseWordSet<H1, H2, EvictThreshold>::resize_and_rehash(std::string entry, c
         length = new_length;
 
         index = 0;
+        if(!entry.empty())
+        {
+            counter = insert_until_evict(entry).second;
+        }
         for (; index < old_length; ++index)
         {
             if(!old1[index].empty())
@@ -255,7 +261,6 @@ void BaseWordSet<H1, H2, EvictThreshold>::resize_and_rehash(std::string entry, c
                 }
             }
         }
-        counter = insert_until_evict(entry).second;
     }
 }
 
